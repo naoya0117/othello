@@ -1,0 +1,9 @@
+services:
+  othello-server:
+    build:
+      context: "./docker/ubuntu"
+      dockerfile: "Dockerfile"
+    volumes:
+      - ./src:/app
+    stdin_open: true
+    tty: true

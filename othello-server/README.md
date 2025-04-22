@@ -1,3 +1,6 @@
 # othello-server
 
-ここにcのソースコードを置く
+```powershell
+docker compose up -d
+docker compoe exec othello-server bash
+```
