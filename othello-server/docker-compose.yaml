@@ -3,6 +3,8 @@ services:
     build:
       context: "./docker/ubuntu"
       dockerfile: "Dockerfile"
+    ports: 
+      - 10000:10000
     volumes:
       - ./src:/app
     stdin_open: true
