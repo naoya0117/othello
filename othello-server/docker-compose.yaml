@@ -7,5 +7,6 @@ services:
       - 10000:10000
     volumes:
       - ./src:/app
+    command: "bash -c 'gcc /app/server.c -o /app/server && /app/server'"
     stdin_open: true
     tty: true
