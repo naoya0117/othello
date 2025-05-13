@@ -12,7 +12,7 @@ SERVER_PORT = 10000
 BUFFER_SIZE = 4096
 
 # ゲーム表示設定
-WINDOW_WIDTH = 800
+WINDOW_WIDTH = 920
 WINDOW_HEIGHT = 600
 BOARD_SIZE = 8
 CELL_SIZE = 60
@@ -306,6 +306,89 @@ class ReversiClient:
                         else:
                             self.debug_print(
                                 f"あなたの番ではありません: 現在の手番={self.current_turn}, あなたの番号={self.player_number}")
+                            
+            # デバッグ用のキー入力
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_w:  # "W"キーで黒の勝利
+                    self.force_win(0)
+                elif event.key == pygame.K_e:  # "E"キーで白の勝利
+                    self.force_win(1)
+                elif event.key == pygame.K_r:  # "R"キーで引き分け
+                    self.force_win(-1)
+                            
+    def force_win(self, winner):
+        """
+        勝利を強制するデバッグ用メソッド。
+
+        Args:
+            winner (int): 勝者を指定 (-1: 引き分け, 0: 黒の勝利, 1: 白の勝利)
+        """
+        if self.game_status != "playing":
+            self.debug_print("ゲームが進行中ではありません。勝利を強制できません。")
+            return
+
+        self.winner = winner
+        self.game_status = "ended"
+
+        if winner == 0:
+            self.set_message("デバッグ: 黒の勝利を強制しました")
+        elif winner == 1:
+            self.set_message("デバッグ: 白の勝利を強制しました")
+        else:
+            self.set_message("デバッグ: 引き分けを強制しました")
+
+        self.debug_print(f"勝利を強制: 勝者={self.winner}")
+                            
+    def show_winner_screen(self):
+        """勝敗画面を表示"""
+        self.screen.fill(GREEN)  # 背景を緑に設定
+
+        # 勝者のメッセージを表示
+        if self.winner == 0:
+            winner_text = "黒の勝ち！"
+        elif self.winner == 1:
+            winner_text = "白の勝ち！"
+        else:
+            winner_text = "引き分け！"
+
+        winner_surface = self.big_font.render(winner_text, True, WHITE)
+        winner_rect = winner_surface.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 50))
+        self.screen.blit(winner_surface, winner_rect)
+
+        # 再戦または終了のメッセージ
+        restart_text = "スペースキーで再戦 / ESCキーで終了"
+        restart_surface = self.font.render(restart_text, True, WHITE)
+        restart_rect = restart_surface.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 50))
+        self.screen.blit(restart_surface, restart_rect)
+
+        pygame.display.flip()
+
+        # ユーザー入力を待つ
+        waiting = True
+        while waiting:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
+                    waiting = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:  # スペースキーで再戦
+                        self.reset_game()
+                        waiting = False
+                    elif event.key == pygame.K_ESCAPE:  # ESCキーで終了
+                        self.running = False
+                        waiting = False
+
+    def reset_game(self):
+        """ゲームをリセット"""
+        self.board = [[0 for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)]
+        self.board[3][3] = 2
+        self.board[4][4] = 2
+        self.board[3][4] = 1
+        self.board[4][3] = 1
+        self.current_turn = 0
+        self.game_status = "playing"
+        self.winner = -1
+        self.set_message("新しいゲームを開始しました")
 
     def update(self):
         """状態更新"""
@@ -316,6 +399,10 @@ class ReversiClient:
         # エラータイマー更新
         if self.error_timer > 0:
             self.error_timer -= 1
+
+        # ゲーム終了時に勝敗画面遷移
+        if self.game_status == "ended":
+            self.show_winner_screen()
 
     def draw(self):
         """画面描画"""
