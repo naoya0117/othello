@@ -266,6 +266,7 @@ static void handle_game_over(void){
     debug_print("ゲーム終了メッセージ: %s", msg);
     for(size_t i=0;i<g_clients->size;i++) safe_send(g_clients->array[i].socket,msg,strlen(msg));
     printf("[INFO] ゲーム終了: winner=%d B=%d W=%d\n",g_state.winner,b,w);
+    sleep(10);
     /* 盤面リセットし次対局準備 */
     init_game_state(&g_state);
     g_game_in_progress = 0;
