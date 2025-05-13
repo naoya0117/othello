@@ -7,7 +7,6 @@ import sys
 import os
 
 # サーバー設定
-SERVER_IP = "127.0.0.1"
 SERVER_PORT = 10000
 BUFFER_SIZE = 4096
 
@@ -646,8 +645,10 @@ class ReversiClient:
 
 def main():
     """メイン関数"""
+    args = sys.argv
+    # サーバーIPをコマンドライン引数から取得
     # コマンドライン引数でサーバーIPを指定できるようにする
-    server_ip = SERVER_IP
+    server_ip = args[1] if len(args) > 1 else "127.0.0.1"
     if len(sys.argv) > 1:
         server_ip = sys.argv[1]
 
