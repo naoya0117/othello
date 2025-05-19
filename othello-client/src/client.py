@@ -478,6 +478,72 @@ class ReversiClient:
                 center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 50))
             self.screen.blit(info_text, info_rect)
 
+    def draw_board2(self):
+        # ボード背景
+        board_rect = pygame.Rect(
+            BOARD_MARGIN - 5,
+            TOP_MARGIN - 5,
+            CELL_SIZE * BOARD_SIZE + 10,
+            CELL_SIZE * BOARD_SIZE + 10
+        )
+        pygame.draw.rect(self.screen, DARKGREEN, board_rect)
+
+        # セルとコマの描画
+        for row in range(BOARD_SIZE):
+            for col in range(BOARD_SIZE):
+                # セル
+                cell_rect = pygame.Rect(
+                    BOARD_MARGIN + col * CELL_SIZE,
+                    TOP_MARGIN + row * CELL_SIZE,
+                    CELL_SIZE,
+                    CELL_SIZE
+                )
+                pygame.draw.rect(self.screen, LIGHTGREEN, cell_rect)
+                pygame.draw.rect(self.screen, BLACK, cell_rect, 1)
+
+                # コマ
+                if self.board[row][col] != 0:
+                    center_x = BOARD_MARGIN + col * CELL_SIZE + CELL_SIZE // 2
+                    center_y = TOP_MARGIN + row * CELL_SIZE + CELL_SIZE // 2
+                    color = BLACK if self.board[row][col] == 1 else WHITE
+                    radius = CELL_SIZE // 2 - 5
+                    pygame.draw.circle(self.screen, color, (center_x, center_y), radius)
+
+        # 座標表示
+        for i in range(BOARD_SIZE):
+            # 列番号
+            col_text = self.font.render(str(i), True, BLACK)
+            self.screen.blit(col_text, (BOARD_MARGIN + i * CELL_SIZE + CELL_SIZE // 2 - 5, TOP_MARGIN - 25))
+            # 行番号
+            row_text = self.font.render(str(i), True, BLACK)
+            self.screen.blit(row_text, (BOARD_MARGIN - 25, TOP_MARGIN + i * CELL_SIZE + CELL_SIZE // 2 - 5))
+
+        # 石数表示（左上・右下はそのまま）
+        black_count, white_count = self.count_stones()
+        if not self.is_spectator:
+            if self.player_number == 0:
+                my_count = black_count
+                opp_count = white_count
+                my_color = BLACK
+                opp_color = WHITE
+            else:
+                my_count = white_count
+                opp_count = black_count
+                my_color = WHITE
+                opp_color = BLACK
+
+            # 左上：相手
+            pygame.draw.circle(self.screen, opp_color, (60, 40), 25)
+            opp_font = pygame.font.Font(None, 48)
+            opp_text = opp_font.render(str(opp_count), True, BLACK if opp_color == WHITE else WHITE)
+            self.screen.blit(opp_text, (95, 22))
+
+            # 右下：自分
+            pygame.draw.circle(self.screen, my_color, (WINDOW_WIDTH - 80, WINDOW_HEIGHT - 40), 25)
+            my_font = pygame.font.Font(None, 48)
+            my_text = my_font.render(str(my_count), True, BLACK if my_color == WHITE else WHITE)
+            self.screen.blit(my_text, (WINDOW_WIDTH - 50, WINDOW_HEIGHT - 58))
+
     def draw_board(self):
         """ボードの描画"""
         # ボード背景
@@ -524,6 +590,7 @@ class ReversiClient:
             row_text = self.font.render(str(i), True, BLACK)
             self.screen.blit(row_text, (BOARD_MARGIN - 25,
                              BOARD_MARGIN + i * CELL_SIZE + CELL_SIZE // 2 - 5))
+
 
     def draw_status(self):
         """ステータス情報の描画"""
@@ -573,18 +640,20 @@ class ReversiClient:
 
         # 接続状態
         conn_status = "接続中" if self.connected else "切断"
-        conn_color = GREEN if self.connected else RED
+        conn_color = BLUE if self.connected else RED
         conn_text = self.font.render(f"サーバー: {conn_status}", True, conn_color)
         self.screen.blit(conn_text, (550, 200))
 
         # プレイヤー接続状況の表示
         if self.connected:
-            connection_text = self.font.render(
-                f"プレイヤー接続状況: {'2人目を待っています' if self.game_status == 'waiting' else '2人接続済み'}",
-                True,
-                BLUE if self.game_status == 'waiting' else GREEN
-            )
-            self.screen.blit(connection_text, (550, 230))
+            # 1行目
+            connection_label = self.font.render("プレイヤー接続状況:", True, BLACK)
+            self.screen.blit(connection_label, (550, 230))
+            # 2行目
+            status_str = "2人目を待っています" if self.game_status == 'waiting' else "2人接続済み"
+            status_color = BLUE if self.game_status == 'waiting' else GREEN
+            connection_status = self.font.render(status_str, True, status_color)
+            self.screen.blit(connection_status, (550, 260))
 
     def draw_message(self):
         """メッセージの描画"""

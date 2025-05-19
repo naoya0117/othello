@@ -28,7 +28,7 @@ BLUE = (0, 0, 255)
 TRANSPARENT = (0, 0, 0, 128)
 
 # デバッグモード
-DEBUG = False
+DEBUG = True
 
 
 class ReversiClient:
